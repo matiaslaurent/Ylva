@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bli Min Valentin 💖</title>
+
+  <style>
+    :root {
+      --bg1: #ffb3d9;
+      --bg2: #ffd1e8;
+      --card: rgba(255, 255, 255, 0.85);
+      --text: #1f1f1f;
+      --shadow: 0 18px 50px rgba(0,0,0,0.18);
+      --yes: #ff3b7a;
+      --no: #d9d9d9;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color: var(--text);
+      background: radial-gradient(circle at 20% 20%, var(--bg2), transparent 40%),
+                  linear-gradient(135deg, var(--bg1), var(--bg2));
+      display: grid;
+      place-items: center;
+      overflow: hidden; /* important when the No button runs around */
+    }
+
+    .card {
+      width: min(520px, calc(100vw - 32px));
+      background: var(--card);
+      border-radius: 24px;
+      box-shadow: var(--shadow);
+      padding: 28px 22px 22px;
+      text-align: center;
+      position: relative;
+      backdrop-filter: blur(10px);
+    }
+
+    .mascot {
+      width: 84px;
+      height: 84px;
+      margin: 0 auto 10px;
+      display: grid;
+      place-items: center;
+      border-radius: 999px;
+      background: white;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.10);
+      position: relative;
+    }
+    .mascot::after {
+      content: "💗";
+      position: absolute;
+      top: -6px;
+      right: -6px;
+      font-size: 22px;
+    }
+    .mascot span { font-size: 44px; }
+
+    h1 {
+      margin: 8px 0 10px;
+      font-size: 28px;
+      line-height: 1.15;
+      letter-spacing: -0.02em;
+    }
+    p {
+      margin: 0 0 18px;
+      font-size: 16px;
+      opacity: 0.9;
+    }
+
+    .btn-row {
+      display: flex;
+      justify-content: center;
+      gap: 14px;
+      margin-top: 10px;
+      position: relative;
+      height: 52px; /* reserve space so card doesn't jump */
+    }
+
+    button {
+      border: 0;
+      padding: 12px 22px;
+      border-radius: 999px;
+      font-size: 16px;
+      font-weight: 650;
+      cursor: pointer;
+      transition: transform 120ms ease, filter 120ms ease;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+    button:active { transform: scale(0.98); }
+
+    #yesBtn {
+      background: var(--yes);
+      color: white;
+      box-shadow: 0 14px 28px rgba(255, 59, 122, 0.30);
+    }
+    #yesBtn:hover { filter: brightness(1.05); }
+
+    /* The "No" button is absolutely positioned so we can move it */
+    #noBtn {
+      background: var(--no);
+      color: #333;
+      position: absolute;
+      left: 50%;
+      transform: translateX(70px);
+      box-shadow: 0 12px 25px rgba(0,0,0,0.10);
+    }
+
+    .hint {
+      margin-top: 14px;
+      font-size: 13px;
+      opacity: 0.65;
+    }
+
+    /* Success screen */
+    .yay h1 { font-size: 34px; margin-top: 4px; }
+    .yay p  { font-size: 16px; }
+    .media {
+      margin-top: 14px;
+      border-radius: 18px;
+      overflow: hidden;
+      box-shadow: 0 14px 35px rgba(0,0,0,0.18);
+      max-width: 100%;
+    }
+    .media img {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+  </style>
+</head>
+
+<body>
+  <main class="card" id="card">
+    <div class="mascot"><span>🐣</span></div>
+    <h1><span id="name">Ylva</span>, vil du være min valentin?</h1>
+    <p>Helt fra hjertet mitt til skjermen din… vil du si ja? 🌹</p>
+
+    <div class="btn-row" id="btnRow">
+      <button id="yesBtn" type="button">Ja</button>
+      <button id="noBtn" type="button" aria-label="No">Nei</button>
+    </div>
+
+    <div class="hint">“Nei” virker visst litt sjenert 🫢</div>
+  </main>
+
+  <script>
+    const card = document.getElementById("card");
+    const btnRow = document.getElementById("btnRow");
+    const yesBtn = document.getElementById("yesBtn");
+    const noBtn  = document.getElementById("noBtn");
+
+    // Optional: set the name dynamically (query string ?name=Matias)
+    const params = new URLSearchParams(location.search);
+    const who = params.get("name");
+    if (who) document.getElementById("name").textContent = who;
+
+    function clamp(n, min, max) {
+      return Math.max(min, Math.min(max, n));
+    }
+
+    function moveNoButton() {
+      // We want to keep the No button within the card area (btnRow)
+      const rowRect = btnRow.getBoundingClientRect();
+
+      // Measure the button (in case fonts change)
+      const btnRect = noBtn.getBoundingClientRect();
+      const w = btnRect.width;
+      const h = btnRect.height;
+
+      // Random position inside btnRow
+      const padding = 6;
+      const x = Math.random() * (rowRect.width  - w - padding * 2) + padding;
+      const y = Math.random() * (rowRect.height - h - padding * 2) + padding;
+
+      noBtn.style.left = `${clamp(x, padding, rowRect.width - w - padding)}px`;
+      noBtn.style.top  = `${clamp(y, padding, rowRect.height - h - padding)}px`;
+    }
+
+    // Place "No" nicely at start
+    function initNoButton() {
+      // Make btnRow a positioning context (it already is)
+      noBtn.style.top = "0px";
+      // put it a bit to the right of center initially
+      noBtn.style.left = "50%";
+      noBtn.style.transform = "translateX(70px)";
+    }
+
+    initNoButton();
+
+    // Desktop: run away on hover
+    noBtn.addEventListener("mouseenter", () => {
+      // Remove the initial transform so left/top are pure px coords after first move
+      noBtn.style.transform = "none";
+      moveNoButton();
+    });
+
+    // Mobile: run away on touch / pointer
+    noBtn.addEventListener("pointerdown", (e) => {
+      e.preventDefault(); // stop "click" from firing reliably
+      noBtn.style.transform = "none";
+      moveNoButton();
+    });
+
+    // If you want it even more “impossible”:
+    noBtn.addEventListener("pointerenter", () => {
+      noBtn.style.transform = "none";
+      moveNoButton();
+    });
+
+    // YES = success screen
+    yesBtn.addEventListener("click", () => {
+      card.classList.add("yay");
+      card.innerHTML = `
+        <div class="mascot"><span>🥳</span></div>
+        <h1>YAY! 🎉</h1>
+        <p>Du gjorde meg om til den lykkeligste på planeten ❤️🤩</p>
+
+        <!-- Optional image/GIF: replace src with your own -->
+        <div class="media">
+          <img
+            src="https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExeHhsZDVrMTl2NGdnM3VvOHlrMTc5enNqNHEweHhnb3BndDM4YTR3biZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/l0Exk8EUzSLsrErEQ/giphy.gif"
+            alt="Happy Dog"
+          />
+        </div>
+      `;
+    });
+
+    // Keep No button within bounds if window resizes
+    window.addEventListener("resize", () => {
+      // only reposition if we've started moving it (transform removed)
+      if (noBtn.style.transform === "none") moveNoButton();
+    });
+  </script>
+</body>
+</html>
